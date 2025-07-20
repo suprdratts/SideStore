@@ -116,6 +116,8 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         
         self.prepareForBackgroundFetch()
         
+        SideStoreClient.shared.notifyFinishedLaunching()
+        
         return true
     }
     

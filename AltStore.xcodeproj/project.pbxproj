@@ -44,6 +44,8 @@
 		0EE7FDC92BE8D07400D1E390 /* NSError+AltStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF6C336124197D700034FD24 /* NSError+AltStore.swift */; };
 		0EE7FDCB2BE8D12B00D1E390 /* ALTLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE7FDC32BE8BC7900D1E390 /* ALTLocalizedError.swift */; };
 		0EE7FDCD2BE9124400D1E390 /* ErrorDetailsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE7FDCC2BE9124400D1E390 /* ErrorDetailsViewController.swift */; };
+		17EFCF952E2D136A0093A407 /* XPCClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 17EFCF912E2D0FDF0093A407 /* XPCClient.m */; };
+		17EFCFAD2E2D1B870093A407 /* SideStoreClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17EFCFA82E2D1B840093A407 /* SideStoreClient.swift */; };
 		19B9B7452845E6DF0076EF69 /* SelectTeamViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19B9B7442845E6DF0076EF69 /* SelectTeamViewController.swift */; };
 		551A15E55999499418AC1022 /* Pods_AltStoreCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 707E746318F0B6F1A44935D3 /* Pods_AltStoreCore.framework */; };
 		A800F7042CE28E3800208744 /* View+AltWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A800F7032CE28E2F00208744 /* View+AltWidget.swift */; };
@@ -624,6 +626,9 @@
 		0EE7FDC22BE8BC4200D1E390 /* ALTWrappedError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ALTWrappedError.h; sourceTree = "<group>"; };
 		0EE7FDC32BE8BC7900D1E390 /* ALTLocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ALTLocalizedError.swift; sourceTree = "<group>"; };
 		0EE7FDCC2BE9124400D1E390 /* ErrorDetailsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorDetailsViewController.swift; sourceTree = "<group>"; };
+		17EFCF912E2D0FDF0093A407 /* XPCClient.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = XPCClient.m; sourceTree = "<group>"; };
+		17EFCF922E2D0FF40093A407 /* XPCServer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = XPCServer.h; sourceTree = "<group>"; };
+		17EFCFA82E2D1B840093A407 /* SideStoreClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideStoreClient.swift; sourceTree = "<group>"; };
 		191E5FAB290A5D92001A3B7C /* libminimuxer.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libminimuxer.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		19B9B7442845E6DF0076EF69 /* SelectTeamViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectTeamViewController.swift; sourceTree = "<group>"; };
 		32741831F952989EC7E74FFA /* Pods-SideStore.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SideStore.debug.xcconfig"; path = "Target Support Files/Pods-SideStore/Pods-SideStore.debug.xcconfig"; sourceTree = "<group>"; };
@@ -1151,6 +1156,16 @@
 				0EE7FDC22BE8BC4200D1E390 /* ALTWrappedError.h */,
 			);
 			path = Errors;
+			sourceTree = "<group>";
+		};
+		17EFCF8C2E2D0FB00093A407 /* LiveContainerSupport */ = {
+			isa = PBXGroup;
+			children = (
+				17EFCFA82E2D1B840093A407 /* SideStoreClient.swift */,
+				17EFCF922E2D0FF40093A407 /* XPCServer.h */,
+				17EFCF912E2D0FDF0093A407 /* XPCClient.m */,
+			);
+			path = LiveContainerSupport;
 			sourceTree = "<group>";
 		};
 		191E5FF4290B2663001A3B7C /* libimobiledevice-glue */ = {
@@ -1978,6 +1993,7 @@
 		BFD247612284B9A500981D42 = {
 			isa = PBXGroup;
 			children = (
+				17EFCF8C2E2D0FB00093A407 /* LiveContainerSupport */,
 				A8F66C072D04C025009689E6 /* SideStore */,
 				BFD2476C2284B9A500981D42 /* AltStore */,
 				BF66EE7F2501AE50007EE018 /* AltStoreCore */,
@@ -2485,8 +2501,6 @@
 			dependencies = (
 			);
 			name = DataStructureTests;
-			packageProductDependencies = (
-			);
 			productName = DataStructuresTests;
 			productReference = A81A8CC52D68BA610086C96F /* DataStructureTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -2505,8 +2519,6 @@
 				A8E2DB282D684CBD009E5D31 /* PBXTargetDependency */,
 			);
 			name = UITests;
-			packageProductDependencies = (
-			);
 			productName = UITests;
 			productReference = A8E2DB212D684CBD009E5D31 /* UITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -3194,6 +3206,7 @@
 				D5E1E7C128077DE90016FC96 /* UpdateKnownSourcesOperation.swift in Sources */,
 				BFE338DF22F0EADB002E24B9 /* FetchSourceOperation.swift in Sources */,
 				D54DED1428CBC44B008B27A0 /* ErrorLogTableViewCell.swift in Sources */,
+				17EFCF952E2D136A0093A407 /* XPCClient.m in Sources */,
 				A81A8CBD2D68B43F0086C96F /* LinkedHashMap.swift in Sources */,
 				D5390C3C2AC3A43900D17E62 /* AddSourceViewController.swift in Sources */,
 				D5CD805F29CA755E00E591B0 /* SourceDetailViewController.swift in Sources */,
@@ -3223,6 +3236,7 @@
 				BFF0B68E23219520007A79E1 /* PatreonViewController.swift in Sources */,
 				BFF00D302501BD7D00746320 /* Intents.intentdefinition in Sources */,
 				D5B6F6AB2AD76541007EED5A /* PreviewAppScreenshotsViewController.swift in Sources */,
+				17EFCFAD2E2D1B870093A407 /* SideStoreClient.swift in Sources */,
 				BFD2476E2284B9A500981D42 /* AppDelegate.swift in Sources */,
 				BF41B806233423AE00C593A3 /* TabBarController.swift in Sources */,
 				BFE00A202503097F00EB4D0C /* INInteraction+AltStore.swift in Sources */,
