@@ -368,7 +368,7 @@ private extension DatabaseManager
         
         let context = self.persistentContainer.newBackgroundContext()
         context.performAndWait {
-            guard let localApp = ALTApplication(fileURL: Bundle.main.bundleURL) else { return }
+            guard let localApp = ALTApplication(fileURL: (Bundle.isBundledWithLiveContainer ? Bundle.lcBundle ?? Bundle.main : Bundle.main).bundleURL) else { return }
             
             let altStoreSource: Source
             
@@ -461,7 +461,7 @@ private extension DatabaseManager
                 FileManager.default.prepareTemporaryURL() { (temporaryFileURL) in
                     do
                     {
-                        try FileManager.default.copyItem(at: Bundle.main.bundleURL, to: temporaryFileURL)
+                        try FileManager.default.copyItem(at: (Bundle.isBundledWithLiveContainer ? Bundle.lcBundle ?? Bundle.main : Bundle.main).bundleURL, to: temporaryFileURL)
                         
                         guard let appBundle = Bundle(url: temporaryFileURL) else { throw ALTError(.invalidApp) }
                         try update(appBundle, bundleID: StoreApp.altstoreAppID)
