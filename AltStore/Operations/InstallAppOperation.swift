@@ -177,7 +177,7 @@ final class InstallAppOperation: ResultOperation<InstalledApp>
             }
             
             var installing = true
-            if installedApp.storeApp?.bundleIdentifier.range(of: Bundle.Info.appbundleIdentifier) != nil {
+            if installedApp.bundleIdentifier.range(of: Bundle.Info.appbundleIdentifier) != nil {
                 // Reinstalling ourself will hang until we leave the app, so we need to exit it without force closing
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
                     if UIApplication.shared.applicationState != .active {
