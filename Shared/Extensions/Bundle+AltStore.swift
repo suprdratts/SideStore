@@ -57,10 +57,20 @@ public extension Bundle
 
 public extension Bundle
 {
-    static var baseAltStoreAppGroupID = "group." + Bundle.Info.appbundleIdentifier
+    static var baseAltStoreAppGroupID = "group.com.SideStore.SideStore"
+    static var isBundledWithLiveContainer = Bundle.main.bundleURL.lastPathComponent == "SideStoreApp.framework" || Bundle.main.bundleURL.lastPathComponent == "LiveWidgetExtension.appex"
+    static var cachedAltStoreAppGroup: String? = nil
 
     var appGroups: [String] {
         return self.infoDictionary?[Bundle.Info.appGroups] as? [String] ?? []
+    }
+    
+    static var lcBundle: Bundle? {
+        return Bundle(url: Bundle.main.bundleURL.deletingLastPathComponent().deletingLastPathComponent())
+    }
+    
+    static var realMainBundle: Bundle {
+        (Bundle.isBundledWithLiveContainer ? Bundle.lcBundle ?? Bundle.main : Bundle.main)
     }
     
     var altstoreAppGroup: String? {        

@@ -710,7 +710,7 @@ private extension AuthenticationOperation
     
     func showRefreshScreenIfNecessary(signer: ALTSigner, session: ALTAppleAPISession, completionHandler: @escaping (Bool) -> Void)
     {
-        guard let application = ALTApplication(fileURL: Bundle.main.bundleURL), let provisioningProfile = application.provisioningProfile else { return completionHandler(false) }
+        guard let application = ALTApplication(fileURL: Bundle.realMainBundle.bundleURL), let provisioningProfile = application.provisioningProfile else { return completionHandler(false) }
         
         // If we're not using the same certificate used to install AltStore, warn user that they need to refresh.
         guard !provisioningProfile.certificates.contains(signer.certificate) else { return completionHandler(false) }
