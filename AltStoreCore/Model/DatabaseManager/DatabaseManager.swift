@@ -403,8 +403,9 @@ private extension DatabaseManager
             {
                 installedApp = app
             }
-            else
-            {
+            else if let app = InstalledApp.first(satisfying: NSPredicate(format: "%K == %@", #keyPath(StoreApp.bundleIdentifier), StoreApp.altstoreAppID), in: context) {
+                installedApp = app
+            } else {
                 //TODO: Support build versions.
                 // For backwards compatibility reasons, we cannot use localApp's buildVersion as storeBuildVersion,
                 // or else the latest update will _always_ be considered new because we don't use buildVersions in our source (yet).
