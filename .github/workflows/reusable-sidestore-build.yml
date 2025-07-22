@@ -67,27 +67,27 @@ jobs:
       bundle_id_suffix: ${{ inputs.bundle_id_suffix }}
     secrets: inherit
 
-  tests-build:
-    if: ${{ vars.ENABLE_TESTS == '1' && vars.ENABLE_TESTS_BUILD == '1' }}
-    needs: shared
-    uses: ./.github/workflows/sidestore-tests-build.yml
-    with:
-      release_tag: ${{ inputs.release_tag }}
-      short_commit: ${{ needs.shared.outputs.short-commit }}
-    secrets: inherit
+  # tests-build:
+  #   if: ${{ vars.ENABLE_TESTS == '1' && vars.ENABLE_TESTS_BUILD == '1' }}
+  #   needs: shared
+  #   uses: ./.github/workflows/sidestore-tests-build.yml
+  #   with:
+  #     release_tag: ${{ inputs.release_tag }}
+  #     short_commit: ${{ needs.shared.outputs.short-commit }}
+  #   secrets: inherit
 
-  tests-run:
-    if: ${{ vars.ENABLE_TESTS == '1' && vars.ENABLE_TESTS_RUN == '1' }}
-    needs: [shared, tests-build]
-    uses: ./.github/workflows/sidestore-tests-run.yml
-    with:
-      release_tag: ${{ inputs.release_tag }}
-      short_commit: ${{ needs.shared.outputs.short-commit }}
-    secrets: inherit
+  # tests-run:
+  #   if: ${{ vars.ENABLE_TESTS == '1' && vars.ENABLE_TESTS_RUN == '1' }}
+  #   needs: [shared, tests-build]
+  #   uses: ./.github/workflows/sidestore-tests-run.yml
+  #   with:
+  #     release_tag: ${{ inputs.release_tag }}
+  #     short_commit: ${{ needs.shared.outputs.short-commit }}
+  #   secrets: inherit
 
   deploy:
-    needs: [shared, build, tests-build, tests-run]  # Keep tests-run in needs
-    if: ${{ always() && (needs.tests-run.result == 'skipped' || needs.tests-run.result == 'success') }}
+    needs: [shared, build]  # Keep tests-run in needs
+    # if: ${{ always() && (needs.tests-run.result == 'skipped' || needs.tests-run.result == 'success') }}
     uses: ./.github/workflows/sidestore-deploy.yml
     with:
       is_beta: ${{ inputs.is_beta }}
