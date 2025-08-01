@@ -59,48 +59,64 @@ public class AbstractConsoleLogger<T: OutputStream>: ConsoleLogger{
         originalStdout = dup(STDOUT_FILENO)
         originalStderr = dup(STDERR_FILENO)
         
+        let redirectedOutStream = self.outPipe?.fileHandleForWriting.fileDescriptor ?? -1
+        let redirectedErrStream = self.errPipe?.fileHandleForWriting.fileDescriptor ?? -1
+        
         // Redirect stdout and stderr to our pipes
-        dup2(self.outPipe?.fileHandleForWriting.fileDescriptor ?? -1, STDOUT_FILENO)
-        dup2(self.errPipe?.fileHandleForWriting.fileDescriptor ?? -1, STDERR_FILENO)
+        dup2(redirectedOutStream, STDOUT_FILENO)
+        dup2(redirectedErrStream, STDERR_FILENO)
 
+        // Disable libc-level buffering
+        // (libc by default uses bufferring except its own console/TTYs such as for pipes)
+        // we do have our own buffering so we disable stdlib io level bufferring
+        setvbuf(stdout, nil, _IONBF, 0)  // disable buffering for stdout
+        setvbuf(stderr, nil, _IONBF, 0)  // disable buffering for stderr
+        
         // Setup readability handlers for raw data
         setupReadabilityHandler(for: outputHandle, isError: false)
         setupReadabilityHandler(for: errorHandle, isError: true)
     }
 
+    let shutdownLock = NSLock()
+
     private func setupReadabilityHandler(for handle: FileHandle?, isError: Bool) {
-        handle?.readabilityHandler = { [weak self] handle in
-            let data = handle.availableData
-            if !data.isEmpty {
-                self?.writeQueue.async {
-                    try? self?.writeData(data)
-                }
-                
-                // Forward to original std stream
-                if let originalFD = isError ? self?.originalStderr : self?.originalStdout {
-                    data.withUnsafeBytes { (bufferPointer) -> Void in
-                        if let baseAddress = bufferPointer.baseAddress, bufferPointer.count > 0 {
-                            write(originalFD, baseAddress, bufferPointer.count)
-                        }
-                    }
-                }
+        handle?.readabilityHandler = readHandler(for: handle, isError: isError)
+    }
+
+    private func readHandler(for handle: FileHandle?, isError: Bool) -> (FileHandle) -> Void {
+        return { [weak self] _ in
+            guard let self, let data = handle?.availableData else { return }
+
+            shutdownLock.lock()
+            defer { shutdownLock.unlock() }
+
+            writeQueue.async {
+                try? self.writeData(data)
+            }
+
+            if let fd = isError ? self.originalStderr : self.originalStdout {
+                data.withUnsafeBytes { _ = write(fd, $0.baseAddress, $0.count) }
             }
         }
     }
+
     
     func writeData(_ data: Data) throws {
         throw AbstractClassError.abstractMethodInvoked
     }
 
     func stopCapturing() {
+        shutdownLock.lock()
+        defer { shutdownLock.unlock() }
+
         ostream.close()
         
         // Restore original stdout and stderr
-        if let stdout = originalStdout {
+        if let stdout = originalStdout, stdout != STDOUT_FILENO {
             dup2(stdout, STDOUT_FILENO)
             close(stdout)
         }
-        if let stderr = originalStderr {
+        if let stderr = originalStderr, stderr != STDERR_FILENO {
             dup2(stderr, STDERR_FILENO)
             close(stderr)
         }
