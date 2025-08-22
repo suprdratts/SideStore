@@ -1015,6 +1015,11 @@ private extension MyAppsViewController
         self.operationQueue.addOperations(operations, waitUntilFinished: false)
     }
     
+    @IBAction func openLC(_ sender: UIBarButtonItem)
+    {
+        SideStoreClient.shared.relaunchLC()
+    }
+    
     @IBAction func activateApp(_ sender: UIButton)
     {
         let point = self.collectionView.convert(sender.center, from: sender.superview)

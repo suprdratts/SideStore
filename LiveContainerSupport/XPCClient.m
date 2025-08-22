@@ -44,6 +44,10 @@ static Class LiveProcessHandlerClass = nil;
     [handler.server finishedLaunching];
 }
 
+- (void) relaunchLC {
+    [NSClassFromString(@"LCSharedUtils") launchToGuestApp];
+}
+
 @end
 
 

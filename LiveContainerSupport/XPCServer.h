@@ -27,4 +27,9 @@
 @interface SideStoreClient : NSObject<RefreshClient>
 @property (class, readonly) SideStoreClient* shared;
 - (void)notifyFinishedLaunching;
+- (void) relaunchLC;
+@end
+
+@interface LCSharedUtils : NSObject
++ (BOOL)launchToGuestApp;
 @end
