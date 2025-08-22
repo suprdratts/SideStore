@@ -20,7 +20,7 @@ jobs:
       matrix:
         include:
           - os: 'macos-15'
-            version: '16.2'
+            version: '16.4'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -37,7 +37,7 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
-          xcode-version: '16.2'
+          xcode-version: '16.4'
 
       # - name: (Tests-Build) Cache Build
       #   uses: irgaly/xcode-cache@v1.8.1
