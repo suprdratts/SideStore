@@ -73,8 +73,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 'macos-15'
-            version: '16.4'
+          - os: 'macos-26'
+            version: '26.0'
 
     runs-on: ${{ matrix.os }}
     outputs:
@@ -426,8 +426,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 'macos-15'
-            version: '16.4'
+          - os: 'macos-26'
+            version: '26.0'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -443,7 +443,7 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
-          xcode-version: '16.4'
+          xcode-version: '26.0'
 
       # - name: (Tests-Build) Cache Build
       #   uses: irgaly/xcode-cache@v1.8.1
@@ -610,8 +610,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: 'macos-15'
-            version: '16.4'
+          - os: 'macos-26'
+            version: '26.0'
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -628,7 +628,7 @@ jobs:
       - name: Setup Xcode
         uses: maxim-lobanov/setup-xcode@v1.6.0
         with:
-          xcode-version: '16.4'
+          xcode-version: '26.0'
 
       # - name: (Tests-Run) Cache Build
       #   uses: irgaly/xcode-cache@v1.8.1

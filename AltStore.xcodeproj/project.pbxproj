@@ -37,6 +37,8 @@
 		0EA1667E2ADFE140003015C1 /* time64.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EA1664C2ADFE0D1003015C1 /* time64.c */; };
 		0EA4263A2C2230150026D7FB /* AnisetteServerList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EA426392C2230150026D7FB /* AnisetteServerList.swift */; };
 		0EA4B9BC2AE4A414009209CE /* plist.c in Sources */ = {isa = PBXBuildFile; fileRef = 0EA4B9BB2AE4A3F6009209CE /* plist.c */; };
+		0ED4AECB2E6DDDB50039E2C0 /* ImportedAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED4AECA2E6DDDAE0039E2C0 /* ImportedAccount.swift */; };
+		0ED4AECD2E6DF17B0039E2C0 /* AltStoreFree.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = 0ED4AECC2E6DF17B0039E2C0 /* AltStoreFree.entitlements */; };
 		0EE7FDC42BE8BC7900D1E390 /* ALTLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE7FDC32BE8BC7900D1E390 /* ALTLocalizedError.swift */; };
 		0EE7FDC62BE8CEA300D1E390 /* ALTLocalizedError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EE7FDC32BE8BC7900D1E390 /* ALTLocalizedError.swift */; };
 		0EE7FDC72BE8CF4100D1E390 /* ALTWrappedError.m in Sources */ = {isa = PBXBuildFile; fileRef = 0EE7FDC02BE8BC2100D1E390 /* ALTWrappedError.m */; };
@@ -449,6 +451,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0ED4AEC82E6DDB2A0039E2C0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BFD247622284B9A500981D42 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BF58047A246A28F7008AE704;
+			remoteInfo = AltBackup;
+		};
 		191E5FB2290A5D9B001A3B7C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = BFD247622284B9A500981D42 /* Project object */;
@@ -497,13 +506,6 @@
 			proxyType = 2;
 			remoteGlobalIDString = B315FDCE2866CDD3002E243C;
 			remoteInfo = "fragmentzip-iOS";
-		};
-		A8E00D3D2D0C95B5000DD2C7 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = BFD247622284B9A500981D42 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = BF58047A246A28F7008AE704;
-			remoteInfo = AltBackup;
 		};
 		A8E2DB272D684CBD009E5D31 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -587,6 +589,7 @@
 /* Begin PBXFileReference section */
 		0E05025B2BEC947000879B5C /* String+SideStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SideStore.swift"; sourceTree = "<group>"; };
 		0E1A1F902AE36A9600364CAD /* bytearray.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = bytearray.c; path = src/bytearray.c; sourceTree = "<group>"; };
+		0E214ADD2E6DD75200B3D63D /* SideStoreDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SideStoreDebug.entitlements; sourceTree = "<group>"; };
 		0EA166412ADFE0D1003015C1 /* jplist.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = jplist.c; path = Dependencies/libplist/src/jplist.c; sourceTree = SOURCE_ROOT; };
 		0EA166422ADFE0D1003015C1 /* Date.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Date.cpp; path = Dependencies/libplist/src/Date.cpp; sourceTree = SOURCE_ROOT; };
 		0EA166432ADFE0D1003015C1 /* Data.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Data.cpp; path = Dependencies/libplist/src/Data.cpp; sourceTree = SOURCE_ROOT; };
@@ -622,6 +625,10 @@
 		0EA166672ADFE122003015C1 /* strbuf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = strbuf.h; path = Dependencies/libplist/src/strbuf.h; sourceTree = SOURCE_ROOT; };
 		0EA426392C2230150026D7FB /* AnisetteServerList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnisetteServerList.swift; sourceTree = "<group>"; };
 		0EA4B9BB2AE4A3F6009209CE /* plist.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = plist.c; path = Dependencies/libplist/src/plist.c; sourceTree = SOURCE_ROOT; };
+		0ED4AEBC2E6DD9CE0039E2C0 /* KeychainAccess.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KeychainAccess.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0ED4AEC22E6DD9FC0039E2C0 /* KeychainAccess.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = KeychainAccess.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		0ED4AECA2E6DDDAE0039E2C0 /* ImportedAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportedAccount.swift; sourceTree = "<group>"; };
+		0ED4AECC2E6DF17B0039E2C0 /* AltStoreFree.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AltStoreFree.entitlements; sourceTree = "<group>"; };
 		0EE7FDC02BE8BC2100D1E390 /* ALTWrappedError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ALTWrappedError.m; sourceTree = "<group>"; };
 		0EE7FDC22BE8BC4200D1E390 /* ALTWrappedError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ALTWrappedError.h; sourceTree = "<group>"; };
 		0EE7FDC32BE8BC7900D1E390 /* ALTLocalizedError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ALTLocalizedError.swift; sourceTree = "<group>"; };
@@ -1463,6 +1470,7 @@
 		A8F66C072D04C025009689E6 /* SideStore */ = {
 			isa = PBXGroup;
 			children = (
+				0E214ADD2E6DD75200B3D63D /* SideStoreDebug.entitlements */,
 				A8B645F82D70C0DD00125819 /* Views */,
 				A8E2DB352D6850A9009E5D31 /* Tests */,
 				A8F66C5C2D04D433009689E6 /* minimuxer */,
@@ -1530,6 +1538,7 @@
 		BF3D648922E79A7700E9056B /* Types */ = {
 			isa = PBXGroup;
 			children = (
+				0ED4AECA2E6DDDAE0039E2C0 /* ImportedAccount.swift */,
 				A8FD917A2D0472DD00322782 /* DeprecatedAPIs.swift */,
 				BF41B807233433C100C593A3 /* LoadingState.swift */,
 			);
@@ -2033,6 +2042,7 @@
 			children = (
 				B39F16112918D7B5002E9404 /* Consts */,
 				BF219A7E22CAC431007676A6 /* AltStore.entitlements */,
+				0ED4AECC2E6DF17B0039E2C0 /* AltStoreFree.entitlements */,
 				BFD2476D2284B9A500981D42 /* AppDelegate.swift */,
 				BF4B78FD24B3D1DB008AB4AC /* SceneDelegate.swift */,
 				BFD247732284B9A500981D42 /* Main.storyboard */,
@@ -2065,6 +2075,8 @@
 		BFD247852284BB3300981D42 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				0ED4AEC22E6DD9FC0039E2C0 /* KeychainAccess.framework */,
+				0ED4AEBC2E6DD9CE0039E2C0 /* KeychainAccess.framework */,
 				A859ED5B2D1EE80D003DCC58 /* OpenSSL.xcframework */,
 				B343F86C295F759E002B1159 /* libresolv.tbd */,
 				D533E8B62727841800A9B5DD /* libAppleArchive.tbd */,
@@ -2617,7 +2629,7 @@
 			buildRules = (
 			);
 			dependencies = (
-				A8E00D3E2D0C95B5000DD2C7 /* PBXTargetDependency */,
+				0ED4AEC92E6DDB2A0039E2C0 /* PBXTargetDependency */,
 				191E5FB3290A5D9B001A3B7C /* PBXTargetDependency */,
 				BF66EE842501AE50007EE018 /* PBXTargetDependency */,
 				BF989176250AABF4002ACF50 /* PBXTargetDependency */,
@@ -2810,6 +2822,7 @@
 				D56D21422B7D9C41007641C5 /* AltIcons.plist in Resources */,
 				A8D484D82D0CD306002C691D /* AltBackup.ipa in Resources */,
 				BF770E6922BD57DD002A40FE /* Silence.m4a in Resources */,
+				0ED4AECD2E6DF17B0039E2C0 /* AltStoreFree.entitlements in Resources */,
 				BFD247772284B9A700981D42 /* Assets.xcassets in Resources */,
 				BFF0B6922321A305007A79E1 /* AboutPatreonHeaderView.xib in Resources */,
 				BFB6B22423187A3D0022A802 /* NewsCollectionViewCell.xib in Resources */,
@@ -2832,9 +2845,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SideStore/Pods-SideStore-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-SideStore/Pods-SideStore-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -3212,6 +3229,7 @@
 				D5CD805F29CA755E00E591B0 /* SourceDetailViewController.swift in Sources */,
 				D57968CB29CB99EF00539069 /* VibrantButton.swift in Sources */,
 				BFB6B21E231870160022A802 /* NewsViewController.swift in Sources */,
+				0ED4AECB2E6DDDB50039E2C0 /* ImportedAccount.swift in Sources */,
 				BFC57A652416C72400EB891E /* DeactivateAppOperation.swift in Sources */,
 				D5CD805D29CA2C1E00E591B0 /* HeaderContentViewController.swift in Sources */,
 				D5FB28EC2ADDF68D00A1C337 /* UIFontDescriptor+Bold.swift in Sources */,
@@ -3337,6 +3355,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		0ED4AEC92E6DDB2A0039E2C0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BF58047A246A28F7008AE704 /* AltBackup */;
+			targetProxy = 0ED4AEC82E6DDB2A0039E2C0 /* PBXContainerItemProxy */;
+		};
 		191E5FB3290A5D9B001A3B7C /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 191E5FAA290A5D92001A3B7C /* minimuxer */;
@@ -3346,11 +3369,6 @@
 			isa = PBXTargetDependency;
 			name = "minimuxer-staticlib";
 			targetProxy = A809F6A02D04D7CB00F0F0F3 /* PBXContainerItemProxy */;
-		};
-		A8E00D3E2D0C95B5000DD2C7 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = BF58047A246A28F7008AE704 /* AltBackup */;
-			targetProxy = A8E00D3D2D0C95B5000DD2C7 /* PBXContainerItemProxy */;
 		};
 		A8E2DB282D684CBD009E5D31 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -3472,7 +3490,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
@@ -3500,7 +3518,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
@@ -3527,7 +3545,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
@@ -3554,7 +3572,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
@@ -3658,9 +3676,7 @@
 			buildSettings = {
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = AltBackup/AltBackup.entitlements;
-				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				ENABLE_DEBUG_DYLIB = NO;
 				INFOPLIST_FILE = AltBackup/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -3672,6 +3688,7 @@
 				LD_WARN_UNUSED_DYLIBS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -3683,9 +3700,7 @@
 			buildSettings = {
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = AltBackup/AltBackup.entitlements;
-				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "$(DEVELOPMENT_TEAM)";
 				ENABLE_DEBUG_DYLIB = NO;
 				INFOPLIST_FILE = AltBackup/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
@@ -3697,6 +3712,7 @@
 				LD_WARN_UNUSED_DYLIBS = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "$(PRODUCT_BUNDLE_IDENTIFIER)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -3811,6 +3827,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$inherited WIDGET_EXTENSION";
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -3845,6 +3862,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$inherited WIDGET_EXTENSION";
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -3886,6 +3904,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HXY2D2FQXT;
 				EAGER_LINKING = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -3957,6 +3976,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HXY2D2FQXT;
 				EAGER_LINKING = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -3996,7 +4016,6 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				ASSETCATALOG_COMPILER_OPTIMIZATION = space;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = AltStore/AltStore.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(inherited)";
@@ -4026,6 +4045,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_ENFORCE_EXCLUSIVE_ACCESS = "debug-only";
 				SWIFT_OBJC_BRIDGING_HEADER = "AltStore/AltStore-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -4042,7 +4062,6 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				ASSETCATALOG_COMPILER_OPTIMIZATION = space;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = AltStore/AltStore.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(inherited)";
@@ -4073,6 +4092,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
 				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_ENABLE_EXPLICIT_MODULES = NO;
 				SWIFT_ENFORCE_EXCLUSIVE_ACCESS = "debug-only";
 				SWIFT_OBJC_BRIDGING_HEADER = "AltStore/AltStore-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Osize";

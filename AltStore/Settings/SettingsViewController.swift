@@ -84,6 +84,8 @@ extension SettingsViewController
     }
     
     fileprivate enum SigningSettingsRow: Int, CaseIterable {
+        case importAccount
+        case exportAccount
         case importCert
         case exportCert
     }
@@ -200,6 +202,16 @@ final class SettingsViewController: UITableViewController
     {
         super.viewDidLoad()
         
+        // --- iOS 26 fix ---
+        if #available(iOS 26.0, *) {
+            let appearance = UINavigationBarAppearance()
+//            appearance.configureWithOpaqueBackground()  // or .defaultBackground if you want blur
+//            appearance.backgroundColor = UIColor(named: "SettingsBackground")
+            appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+            appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            navigationController?.navigationBar.standardAppearance = appearance
+            navigationController?.navigationBar.scrollEdgeAppearance = appearance       // required for iOS 26, maybe enforce it in storyboard?
+        } 
         let nib = UINib(nibName: "SettingsHeaderFooterView", bundle: nil)
         self.prototypeHeaderFooterView = nib.instantiate(withOwner: nil, options: nil)[0] as? SettingsHeaderFooterView
         
@@ -245,6 +257,117 @@ final class SettingsViewController: UITableViewController
         }
         
         configureReleaseChannelButton()
+        detectAndImportAccountFile()
+    }
+    
+    func importAccountAtFile(_ file: URL, remove: Bool = false) {
+        if let accountData = try? Data(contentsOf: file),
+           let account = try? Foundation.JSONDecoder().decode(ImportedAccount.self, from: accountData) {
+            print("We want to import this account probably: \(account)")
+            if remove {
+                try? FileManager.default.removeItem(at: file)
+            }
+            Keychain.shared.appleIDEmailAddress = account.email
+            Keychain.shared.appleIDPassword = account.password
+            Keychain.shared.adiPb = account.adiPB
+            Keychain.shared.adiSerial = account.serial
+            Keychain.shared.identifier = account.local_user
+            signIn()
+            update()
+            if let altCert = ALTCertificate(p12Data: account.cert, password: account.certpass) {
+                Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!
+                Keychain.shared.signingCertificatePassword = account.certpass
+                let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(account.email)'!", comment: ""), detailText: "SideStore should be fully operational!")
+                return toastView.show(in: self)
+            } else {
+                let toastView = ToastView(text: NSLocalizedString("Failed to import account certificate!", comment: ""), detailText: "Failed to create ALTCertificate. Check if the password is correct. Still imported account/adi.pb details!")
+                return toastView.show(in: self)
+            }
+        }
+    }
+    
+    func detectAndImportAccountFile() {
+        let accountFileURL = FileManager.default.documentsDirectory.appendingPathComponent("Account.sideconf")
+        #if !DEBUG
+        importAccountAtFile(accountFileURL, remove: true)
+        #else
+        importAccountAtFile(accountFileURL)
+        #endif
+    }
+    
+    func exportAccount(_ certpass: String) -> ImportedAccount? {
+        guard let email = Keychain.shared.appleIDEmailAddress,
+              let password = Keychain.shared.appleIDPassword,
+              let cert = Keychain.shared.signingCertificate,
+              let identifier = Keychain.shared.identifier,
+              let adiSerial = Keychain.shared.adiSerial,
+              let adiPB = Keychain.shared.adiPb else {
+            #if DEBUG
+            print(Keychain.shared.appleIDEmailAddress ?? "Empty email")
+            print(Keychain.shared.appleIDPassword ?? "Empty password")
+            print(Keychain.shared.signingCertificate ?? "Empty cert")
+            print(Keychain.shared.identifier ?? "Empty identifier")
+            print(Keychain.shared.adiPb ?? "Empty adiPb")
+            print(Keychain.shared.adiSerial ?? "Empty adiSerial")
+            #endif
+            return nil
+        }
+        return ImportedAccount(email: email, password: password, cert: cert, certpass: certpass, local_user: identifier, serial: adiSerial, adiPB: adiPB)
+    }
+    
+    func showExportAccount() {
+        
+        Task {
+            let password = await withUnsafeContinuation { (c: UnsafeContinuation<String?,Never>) in
+                let alertController = UIAlertController(title: NSLocalizedString("Please enter the password for the certificate.", comment: ""), message: nil, preferredStyle: .alert)
+                
+                alertController.addTextField { (textField) in
+                    textField.autocorrectionType = .no
+                    textField.autocapitalizationType = .none
+                }
+                
+                let submitAction = UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default) { (action) in
+                    let textField = alertController.textFields?.first
+                    
+                    let code = textField?.text ?? ""
+                    c.resume(returning: code)
+                }
+                alertController.addAction(submitAction)
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { (action) in
+                    c.resume(returning: nil)
+                })
+                
+                self.present(alertController, animated: true)
+            }
+            
+            guard let password else {
+                return
+            }
+            
+            guard let account = exportAccount(password) else {
+                let toastView = ToastView(text: NSLocalizedString("Failed to export account!", comment: ""), detailText: "Account not found.")
+                toastView.show(in: self)
+                return
+            }
+            
+            guard let accountData = try? Foundation.JSONEncoder().encode(account).base64EncodedData() else {
+                let toastView = ToastView(text: NSLocalizedString("Failed to export account data!", comment: ""), detailText: "Account malformed.")
+                toastView.show(in: self)
+                return
+
+            }
+            
+            let accountTmpPath = FileManager.default.temporaryDirectory.appendingPathComponent("\(account.email).sideconf")
+            do {
+                try accountData.write(to: accountTmpPath)
+            } catch {
+                let toastView = ToastView(text: NSLocalizedString("Failed to export account!", comment: ""), detailText: error.localizedDescription)
+                toastView.show(in: self)
+                return
+            }
+            let exportVC = UIDocumentPickerViewController(forExporting: [accountTmpPath], asCopy: false)
+            self.present(exportVC, animated: true)
+        }
     }
     
     override func viewWillAppear(_ animated: Bool)
@@ -1225,6 +1348,26 @@ extension SettingsViewController
         case .signing:
             let row = SigningSettingsRow.allCases[indexPath.row]
             switch row {
+            case .exportAccount: showExportAccount()
+            case .importAccount:
+                Task {
+                    let confUrl = await withUnsafeContinuation { c in
+                        let importVc = UIDocumentPickerViewController(forOpeningContentTypes: [UTType(filenameExtension: "sideconf")!], asCopy: false)
+                        ImportExport.documentPickerHandler = DocumentPickerHandler { url in
+                            c.resume(returning: url)
+                        }
+                        importVc.delegate = ImportExport.documentPickerHandler
+                        
+                        self.present(importVc, animated: true)
+                        
+                    }
+                    guard let confUrl else {
+                        return
+                    }
+                    _ = confUrl.startAccessingSecurityScopedResource()
+                    defer { confUrl.stopAccessingSecurityScopedResource() }
+                    importAccountAtFile(confUrl)
+                }
             case .importCert:
                 Task {
                     let certUrl = await withUnsafeContinuation { c in
@@ -1266,7 +1409,7 @@ extension SettingsViewController
                     guard let password else {
                         return
                     }
-                    let _ = certUrl.startAccessingSecurityScopedResource()
+                    _ = certUrl.startAccessingSecurityScopedResource()
                     defer {
                         certUrl.stopAccessingSecurityScopedResource()
                     }
@@ -1289,8 +1432,6 @@ extension SettingsViewController
                     let toastView = ToastView(text: NSLocalizedString("Certificate imported successfully!", comment: ""), detailText: nil)
                     toastView.show(in: self)
                 }
-
-                break
             case .exportCert:
                 Task {
                     guard let certData = Keychain.shared.signingCertificate else {
@@ -1348,7 +1489,6 @@ extension SettingsViewController
                     let exportVC = UIDocumentPickerViewController(forExporting: [newCertTmpPath], asCopy: false)
                     self.present(exportVC, animated: true)
                 }
-                break
             }
             
         case .diagnostics:

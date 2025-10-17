@@ -80,22 +80,55 @@ public class AbstractConsoleLogger<T: OutputStream>: ConsoleLogger{
     let shutdownLock = NSLock()
 
     private func setupReadabilityHandler(for handle: FileHandle?, isError: Bool) {
-        handle?.readabilityHandler = readHandler(for: handle, isError: isError)
+        handle?.readabilityHandler = readHandler(isError: isError)
     }
 
-    private func readHandler(for handle: FileHandle?, isError: Bool) -> (FileHandle) -> Void {
+    private func readHandler(isError: Bool) -> (FileHandle) -> Void {
         return { [weak self] _ in
-            guard let self, let data = handle?.availableData else { return }
+            // Lock first before touching anything
+            self?.shutdownLock.lock()
+            defer { self?.shutdownLock.unlock() }
 
-            shutdownLock.lock()
-            defer { shutdownLock.unlock() }
+            // Capture strong self *after* lock is acquired
+            guard let self = self else { return }
+            
+            let handle = isError ? self.errorHandle : self.outputHandle
+            guard let data = handle?.availableData else { return }
 
             writeQueue.async {
                 try? self.writeData(data)
             }
 
-            if let fd = isError ? self.originalStderr : self.originalStdout {
-                data.withUnsafeBytes { _ = write(fd, $0.baseAddress, $0.count) }
+            // 2. Echo to original stdout/stderr if still valid
+            guard let fd = isError ? self.originalStderr : self.originalStdout else {
+                return
+            }
+
+            let appName = Bundle.main.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "UnknownApp"
+            guard fcntl(fd, F_GETFD) != -1 else {
+                NSLog("[%@] ConsoleLogger: Original FD (%d) is invalid, skipping echo", appName, fd)
+                return
+            }
+
+            data.withUnsafeBytes { rawBufferPointer in
+                guard let base = rawBufferPointer.baseAddress else { return }
+                var remaining = data.count
+                var offset = 0
+                let maxChunkSize = 16 * 1024 // 16 KB chunks
+
+                // write in chunks, else will throw 'Result too large'
+                while remaining > 0 {
+                    let chunkSize = min(maxChunkSize, remaining)
+                    let written = write(fd, base.advanced(by: offset), chunkSize)
+
+                    if written < 0 {
+                        NSLog("[%@] ConsoleLogger: Failed to re-echo to FD %d: %s", appName, fd, strerror(errno))
+                        break
+                    }
+
+                    remaining -= written
+                    offset += written
+                }
             }
         }
     }

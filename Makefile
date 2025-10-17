@@ -201,7 +201,7 @@ build-and-test:
 	@echo ""
 	@echo "Performing a build and running tests..."
 	@xcodebuild test \
-		-destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.2' \
+		-destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.0' \
 		-resultBundlePath build/tests/test-results.xcresult \
     	-enableCodeCoverage YES \
 		$(COMMON_BUILD_SETTINGS)
@@ -213,7 +213,7 @@ build-tests:
 	@echo "Performing a build-for-testing..."
 	@xcodebuild build-for-testing \
     	-enableCodeCoverage YES \
-		-destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.2' \
+		-destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.0' \
 		$(COMMON_BUILD_SETTINGS)
 
 run-tests:
@@ -224,22 +224,22 @@ run-tests:
 	@xcodebuild test-without-building \
     	-enableCodeCoverage YES \
 		-resultBundlePath build/tests/test-results.xcresult \
-		-destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=18.2' \
+		-destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=26.0' \
 		$(COMMON_BUILD_SETTINGS)
 
 boot-sim-async:
-	@if xcrun simctl list devices "iPhone 16 Pro" | grep -q "Booted"; then \
-		echo "Simulator 'iPhone 16 Pro' is already booted."; \
+	@if xcrun simctl list devices "iPhone 17 Pro" | grep -q "Booted"; then \
+		echo "Simulator 'iPhone 17 Pro' is already booted."; \
 	else \
-		echo "Booting simulator 'iPhone 16 Pro' asynchronously..."; \
-		xcrun simctl boot "iPhone 16 Pro" & \
+		echo "Booting simulator 'iPhone 17 Pro' asynchronously..."; \
+		xcrun simctl boot "iPhone 17 Pro" & \
 		echo "Simulator boot command dispatched."; \
 	fi
 
 sim-boot-check:
 	@echo "Checking simulator boot status..."
-	@if xcrun simctl list devices "iPhone 16 Pro" | grep -q "Booted"; then \
-		echo "Simulator 'iPhone 16 Pro' is booted."; \
+	@if xcrun simctl list devices "iPhone 17 Pro" | grep -q "Booted"; then \
+		echo "Simulator 'iPhone 17 Pro' is booted."; \
 	else \
 		echo "Simulator bootup failed or is not booted yet."; \
 		exit 1; \

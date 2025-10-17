@@ -46,6 +46,14 @@ final class SourcesViewController: UICollectionViewController
     {
         super.viewDidLoad()
         
+        // Ensure large titles
+        navigationController?.navigationBar.prefersLargeTitles = true
+        navigationItem.largeTitleDisplayMode = .automatic
+
+        // Set title
+        navigationItem.title = "Sources"
+        navigationController?.navigationBar.layoutMargins.left = 20
+        
         let layout = self.makeLayout()
         self.collectionView.collectionViewLayout = layout
         

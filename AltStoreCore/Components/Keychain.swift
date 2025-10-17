@@ -80,6 +80,9 @@ public class Keychain
     @KeychainItem(key: "identifier")
     public var identifier: String?
     
+    @KeychainItem(key: "adiSerial")
+    public var adiSerial: String?
+    
     @KeychainItem(key: "adiPb")
     public var adiPb: String?
     
