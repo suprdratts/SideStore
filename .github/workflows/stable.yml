@@ -89,43 +89,6 @@ jobs:
             ~/Library/Caches/org.swift.swiftpm
           key: xcode-cache-build-stable-
 
-      - name: (Build) Restore Pods from Cache (Exact match)
-        id: pods-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            ./Podfile.lock
-            ./Pods/
-            ./AltStore.xcworkspace/
-          key: pods-cache-build-stable-${{ hashFiles('Podfile') }}
-
-      - name: (Build) Restore Pods from Cache (Last Available)
-        if: ${{ steps.pods-restore.outputs.cache-hit != 'true' }}
-        id: pods-restore-recent
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            ./Podfile.lock
-            ./Pods/
-            ./AltStore.xcworkspace/
-          key: pods-cache-build-stable-
-
-
-      - name: (Build) Install CocoaPods
-        run: pod install
-        shell: bash
-
-      - name: (Build) Save Pods to Cache
-        id: save-pods
-        if: ${{ steps.pods-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            ./Podfile.lock
-            ./Pods/
-            ./AltStore.xcworkspace/
-          key: pods-cache-build-stable-${{ hashFiles('Podfile') }}
-
       - name: (Build) Clean previous build artifacts
         run: |
           make clean
@@ -138,10 +101,6 @@ jobs:
         run: |
           echo ">>>>>>>>> Workdir <<<<<<<<<<"
           ls -la .
-          echo ""
-
-          echo ">>>>>>>>> Pods <<<<<<<<<<"
-          find Pods -maxdepth 2 -exec ls -ld {} + || true  # List contents if directory exists
           echo ""
 
           echo ">>>>>>>>> SideStore <<<<<<<<<<"

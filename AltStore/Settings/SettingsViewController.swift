@@ -121,6 +121,7 @@ final class SettingsViewController: UITableViewController
     @IBOutlet private var accountTypeLabel: UILabel!
     
     @IBOutlet private var backgroundRefreshSwitch: UISwitch!
+    @IBOutlet private var enableEMPforWireguard: UISwitch!
     @IBOutlet private var noIdleTimeoutSwitch: UISwitch!
     @IBOutlet private var disableAppLimitSwitch: UISwitch!
     @IBOutlet private var betaUpdatesSwitch: UISwitch!
@@ -257,32 +258,40 @@ final class SettingsViewController: UITableViewController
         }
         
         configureReleaseChannelButton()
+        #if !targetEnvironment(simulator)
         detectAndImportAccountFile()
+        #endif
     }
     
     func importAccountAtFile(_ file: URL, remove: Bool = false) {
-        if let accountData = try? Data(contentsOf: file),
-           let account = try? Foundation.JSONDecoder().decode(ImportedAccount.self, from: accountData) {
-            print("We want to import this account probably: \(account)")
-            if remove {
-                try? FileManager.default.removeItem(at: file)
-            }
-            Keychain.shared.appleIDEmailAddress = account.email
-            Keychain.shared.appleIDPassword = account.password
-            Keychain.shared.adiPb = account.adiPB
-            Keychain.shared.adiSerial = account.serial
-            Keychain.shared.identifier = account.local_user
-            signIn()
-            update()
-            if let altCert = ALTCertificate(p12Data: account.cert, password: account.certpass) {
-                Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!
-                Keychain.shared.signingCertificatePassword = account.certpass
-                let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(account.email)'!", comment: ""), detailText: "SideStore should be fully operational!")
-                return toastView.show(in: self)
-            } else {
-                let toastView = ToastView(text: NSLocalizedString("Failed to import account certificate!", comment: ""), detailText: "Failed to create ALTCertificate. Check if the password is correct. Still imported account/adi.pb details!")
-                return toastView.show(in: self)
-            }
+        _ = file.startAccessingSecurityScopedResource()
+        defer { file.stopAccessingSecurityScopedResource() }
+        guard let accountD = try? Data(contentsOf: file) else {
+            let toastView = ToastView(text: NSLocalizedString("Could not read data from file!", comment: ""), detailText: "\(file)")
+            return toastView.show(in: self)
+        }
+        guard let account = try? Foundation.JSONDecoder().decode(ImportedAccount.self, from: accountD) else {
+            let toastView = ToastView(text: NSLocalizedString("Could not parse data from file!", comment: ""), detailText: "\(file)")
+            return toastView.show(in: self)
+        }
+        print("We want to import this account probably: \(account)")
+        if remove {
+            try? FileManager.default.removeItem(at: file)
+        }
+        Keychain.shared.appleIDEmailAddress = account.email
+        Keychain.shared.appleIDPassword = account.password
+        Keychain.shared.adiPb = account.adiPB
+        Keychain.shared.identifier = account.local_user
+        signIn()
+        update()
+        if let altCert = ALTCertificate(p12Data: account.cert, password: account.certpass) {
+            Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!
+            Keychain.shared.signingCertificatePassword = account.certpass
+            let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(account.email)'!", comment: ""), detailText: "SideStore should be fully operational!")
+            return toastView.show(in: self)
+        } else {
+            let toastView = ToastView(text: NSLocalizedString("Failed to import account certificate!", comment: ""), detailText: "Failed to create ALTCertificate. Check if the password is correct. Still imported account/adi.pb details!")
+            return toastView.show(in: self)
         }
     }
     
@@ -300,7 +309,6 @@ final class SettingsViewController: UITableViewController
               let password = Keychain.shared.appleIDPassword,
               let cert = Keychain.shared.signingCertificate,
               let identifier = Keychain.shared.identifier,
-              let adiSerial = Keychain.shared.adiSerial,
               let adiPB = Keychain.shared.adiPb else {
             #if DEBUG
             print(Keychain.shared.appleIDEmailAddress ?? "Empty email")
@@ -308,17 +316,16 @@ final class SettingsViewController: UITableViewController
             print(Keychain.shared.signingCertificate ?? "Empty cert")
             print(Keychain.shared.identifier ?? "Empty identifier")
             print(Keychain.shared.adiPb ?? "Empty adiPb")
-            print(Keychain.shared.adiSerial ?? "Empty adiSerial")
             #endif
             return nil
         }
-        return ImportedAccount(email: email, password: password, cert: cert, certpass: certpass, local_user: identifier, serial: adiSerial, adiPB: adiPB)
+        return ImportedAccount(email: email, password: password, cert: cert, certpass: certpass, local_user: identifier, adiPB: adiPB)
     }
     
     func showExportAccount() {
         
         Task {
-            let password = await withUnsafeContinuation { (c: UnsafeContinuation<String?,Never>) in
+            guard let password = await withUnsafeContinuation({ (c: UnsafeContinuation<String?,Never>) in
                 let alertController = UIAlertController(title: NSLocalizedString("Please enter the password for the certificate.", comment: ""), message: nil, preferredStyle: .alert)
                 
                 alertController.addTextField { (textField) in
@@ -338,19 +345,16 @@ final class SettingsViewController: UITableViewController
                 })
                 
                 self.present(alertController, animated: true)
-            }
-            
-            guard let password else {
+            }) else {
                 return
             }
             
             guard let account = exportAccount(password) else {
                 let toastView = ToastView(text: NSLocalizedString("Failed to export account!", comment: ""), detailText: "Account not found.")
-                toastView.show(in: self)
-                return
+                return toastView.show(in: self)
             }
             
-            guard let accountData = try? Foundation.JSONEncoder().encode(account).base64EncodedData() else {
+            guard let accountData = try? Foundation.JSONEncoder().encode(account) else {
                 let toastView = ToastView(text: NSLocalizedString("Failed to export account data!", comment: ""), detailText: "Account malformed.")
                 toastView.show(in: self)
                 return
@@ -467,6 +471,7 @@ private extension SettingsViewController
         
         // AppRefreshRow
         self.backgroundRefreshSwitch.isOn = UserDefaults.standard.isBackgroundRefreshEnabled
+        self.enableEMPforWireguard.isOn = UserDefaults.standard.enableEMPforWireguard
         self.noIdleTimeoutSwitch.isOn = UserDefaults.standard.isIdleTimeoutDisableEnabled
         self.disableAppLimitSwitch.isOn = UserDefaults.standard.isAppLimitDisabled
 
@@ -742,6 +747,11 @@ private extension SettingsViewController
     @IBAction func toggleIsBackgroundRefreshEnabled(_ sender: UISwitch)
     {
         UserDefaults.standard.isBackgroundRefreshEnabled = sender.isOn
+    }
+    
+    @IBAction func toggleEnableEMPforWireguard(_ sender: UISwitch)
+    {
+        UserDefaults.standard.enableEMPforWireguard = sender.isOn
     }
     
     @IBAction func toggleNoIdleTimeoutEnabled(_ sender: UISwitch)
@@ -1364,15 +1374,25 @@ extension SettingsViewController
                     guard let confUrl else {
                         return
                     }
-                    _ = confUrl.startAccessingSecurityScopedResource()
-                    defer { confUrl.stopAccessingSecurityScopedResource() }
                     importAccountAtFile(confUrl)
                 }
             case .importCert:
+                let importVc = UIDocumentPickerViewController(forOpeningContentTypes: [UTType(filenameExtension: "p12")!], asCopy: false)
+                ImportExport.documentPickerHandler = DocumentPickerHandler { url in
+                    guard let url else {
+                        return
+                    }
+                    importVc.delegate = ImportExport.documentPickerHandler
+                    self.present(importVc, animated: true)
+                    _ = url.startAccessingSecurityScopedResource()
+                    defer { url.stopAccessingSecurityScopedResource() }
+                }
                 Task {
                     let certUrl = await withUnsafeContinuation { c in
                         let importVc = UIDocumentPickerViewController(forOpeningContentTypes: [UTType(filenameExtension: "p12")!], asCopy: false)
                         ImportExport.documentPickerHandler = DocumentPickerHandler { url in
+                            _ = url?.startAccessingSecurityScopedResource()
+                            defer { url?.stopAccessingSecurityScopedResource() }
                             c.resume(returning: url)
                         }
                         importVc.delegate = ImportExport.documentPickerHandler

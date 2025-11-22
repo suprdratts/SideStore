@@ -14,6 +14,5 @@ struct ImportedAccount: Codable {
     let cert: Data
     let certpass: String
     let local_user: String
-    let serial: String
     let adiPB: String
 }

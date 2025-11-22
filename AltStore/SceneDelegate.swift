@@ -8,6 +8,7 @@
 
 import UIKit
 import AltStoreCore
+import EmotionalDamage
 
 @available(iOS 13, *)
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate
@@ -39,7 +40,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate
         guard DatabaseManager.shared.isStarted else { return }
         
         AppManager.shared.update()
-        
+        if UserDefaults.standard.enableEMPforWireguard {
+            start_em_proxy(bind_addr: Consts.Proxy.serverURL)
+        }
+
         PatreonAPI.shared.refreshPatreonAccount()
     }
 
@@ -54,7 +58,9 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate
         // Make sure to update AppDelegate.applicationDidEnterBackground() as well.
 
         // TODO: @mahee96: find if we need to stop em_proxy as in altstore?
-        // stop_em_proxy()
+        if UserDefaults.standard.enableEMPforWireguard {
+            stop_em_proxy()
+        }
 
         guard let oneMonthAgo = Calendar.current.date(byAdding: .month, value: -1, to: Date()) else { return }
         

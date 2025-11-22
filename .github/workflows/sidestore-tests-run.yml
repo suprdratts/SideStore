@@ -56,41 +56,6 @@ jobs:
             ~/Library/Caches/org.swift.swiftpm
           key: xcode-cache-tests-${{ github.ref_name }}-${{ github.sha }}
 
-      - name: (Tests-Run) Restore Pods from Cache (Exact match)
-        id: pods-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            ./Podfile.lock
-            ./Pods/
-            ./AltStore.xcworkspace/
-          key: pods-cache-test-${{ github.ref_name }}-${{ hashFiles('Podfile') }}
-
-      - name: (Tests-Run) Restore Pods from Cache (Last Available)
-        if: ${{ steps.pods-restore.outputs.cache-hit != 'true' }}
-        id: pods-restore-recent
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            ./Podfile.lock
-            ./Pods/
-            ./AltStore.xcworkspace/
-          key: pods-cache-test-${{ github.ref_name }}-
-
-      - name: (Tests-Run) Install CocoaPods
-        run: pod install
-        shell: bash
-
-      - name: (Tests-Run) Save Pods to Cache
-        if: ${{ steps.pods-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v3
-        with:
-          path: |
-            ./Podfile.lock
-            ./Pods/
-            ./AltStore.xcworkspace/
-          key: pods-cache-test-${{ github.ref_name }}-${{ hashFiles('Podfile') }}
-
       - name: (Tests-Run) Clean previous build artifacts
         run: |
           make clean
@@ -102,10 +67,6 @@ jobs:
         run: |
           echo ">>>>>>>>> Workdir <<<<<<<<<<"
           ls -la .
-          echo ""
-
-          echo ">>>>>>>>> Pods <<<<<<<<<<"
-          find Pods -maxdepth 2 -exec ls -ld {} + || true  # List contents if directory exists
           echo ""
 
           echo ">>>>>>>>> SideStore <<<<<<<<<<"

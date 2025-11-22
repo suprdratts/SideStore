@@ -116,6 +116,35 @@ jobs:
         run: echo "date=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
         shell: bash
 
+
+      - name: List files to upload
+        id: list_uploads
+        run: |
+          echo ">>>>>>>>> Workdir <<<<<<<<<<"
+          find . -maxdepth 4 -exec ls -ld {} +  || true  # List contents if directory exists
+          echo ""
+
+          FILES="SideStore.ipa SideStore.dSYMs.zip encrypted-build-logs.zip"
+
+          if [[ "${{ vars.ENABLE_TESTS }}" == "1" && "${{ vars.ENABLE_TESTS_BUILD }}" == "1" ]]; then
+            FILES="$FILES encrypted-tests-build-logs.zip"
+          fi
+
+          if [[ "${{ vars.ENABLE_TESTS }}" == "1" && "${{ vars.ENABLE_TESTS_RUN }}" == "1" ]]; then
+            FILES="$FILES encrypted-tests-run-logs.zip test-results.zip tests-recording.mp4"
+          fi
+
+          echo "Final upload list:"
+          for f in $FILES; do
+            if [[ -f "$f" ]]; then
+              echo "  ✓ $f"
+            else
+              echo "  - $f (missing)"
+            fi
+          done
+
+          echo "files=$FILES" >> $GITHUB_OUTPUT
+
       - name: Upload to releases
         uses: IsaacShelton/update-existing-release@v1.3.4
         with:
@@ -123,7 +152,7 @@ jobs:
           release: ${{ inputs.release_name }}
           tag: ${{ inputs.release_tag }}
           prerelease: ${{ inputs.is_beta }}
-          files: SideStore.ipa SideStore.dSYMs.zip encrypted-build-logs.zip
+          files: ${{ steps.list_uploads.outputs.files }}
           body: |
               This is an ⚠️ **EXPERIMENTAL** ⚠️ ${{ inputs.release_name }} build for commit [${{ github.sha }}](https://github.com/${{ github.repository }}/commit/${{ github.sha }}).
 

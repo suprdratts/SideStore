@@ -8,8 +8,11 @@
 
 import UIKit
 import Roxas
+import EmotionalDamage
 import minimuxer
 import WidgetKit
+
+import AltSign
 import AltStoreCore
 import UniformTypeIdentifiers
 
@@ -70,7 +73,13 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
         }
 
         #if !targetEnvironment(simulator)
-        guard let pf = PairingFileManager.shared.fetchPairingFile(presentingVC: self) else {
+        
+        detectAndImportAccountFile()
+        
+        if UserDefaults.standard.enableEMPforWireguard {
+            start_em_proxy(bind_addr: Consts.Proxy.serverURL)
+        }
+        guard let pf = fetchPairingFile() else {
             displayError("Device pairing file not found.")
             return
         }
@@ -102,6 +111,11 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         let url = urls[0]
         let isSecuredURL = url.startAccessingSecurityScopedResource() == true
+        defer {
+            if (isSecuredURL) {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
 
         do {
             let data = try Data(contentsOf: url)
@@ -114,13 +128,51 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
         } catch {
             displayError("Unable to read pairing file")
         }
-
-        if isSecuredURL { url.stopAccessingSecurityScopedResource() }
-        controller.dismiss(animated: true)
+        
+        controller.dismiss(animated: true, completion: nil)
     }
 
     func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
         displayError("Choosing a pairing file was cancelled. Please re-open the app and try again.")
+    }
+    
+    func importAccountAtFile(_ file: URL, remove: Bool = false) {
+        _ = file.startAccessingSecurityScopedResource()
+        defer { file.stopAccessingSecurityScopedResource() }
+        guard let accountD = try? Data(contentsOf: file) else {
+            let toastView = ToastView(text: NSLocalizedString("Could not read data from file!", comment: ""), detailText: "\(file)")
+            return toastView.show(in: self)
+        }
+        guard let account = try? Foundation.JSONDecoder().decode(ImportedAccount.self, from: accountD) else {
+            let toastView = ToastView(text: NSLocalizedString("Could not parse data from file!", comment: ""), detailText: "\(file)")
+            return toastView.show(in: self)
+        }
+        print("We want to import this account probably: \(account)")
+        if remove {
+            try? FileManager.default.removeItem(at: file)
+        }
+        Keychain.shared.appleIDEmailAddress = account.email
+        Keychain.shared.appleIDPassword = account.password
+        Keychain.shared.adiPb = account.adiPB
+        Keychain.shared.identifier = account.local_user
+        if let altCert = ALTCertificate(p12Data: account.cert, password: account.certpass) {
+            Keychain.shared.signingCertificate = altCert.encryptedP12Data(withPassword: "")!
+            Keychain.shared.signingCertificatePassword = account.certpass
+            let toastView = ToastView(text: NSLocalizedString("Successfully imported '\(account.email)'!", comment: ""), detailText: "SideStore should be fully operational!")
+            return toastView.show(in: self)
+        } else {
+            let toastView = ToastView(text: NSLocalizedString("Failed to import account certificate!", comment: ""), detailText: "Failed to create ALTCertificate. Check if the password is correct. Still imported account/adi.pb details!")
+            return toastView.show(in: self)
+        }
+    }
+    
+    func detectAndImportAccountFile() {
+        let accountFileURL = FileManager.default.documentsDirectory.appendingPathComponent("Account.sideconf")
+        #if !DEBUG
+        importAccountAtFile(accountFileURL, remove: true)
+        #else
+        importAccountAtFile(accountFileURL)
+        #endif
     }
 }
 
