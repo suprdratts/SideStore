@@ -4,8 +4,8 @@ on:
     branches:
       - develop
       - LiveContainerSupport
-  # schedule:
-    # - cron: '0 0 * * *' # Runs every night at midnight UTC
+  schedule:
+    - cron: '0 0 * * *' # Runs every night at midnight UTC
   workflow_dispatch: # Allows manual trigger
 
 # cancel duplicate run if from same branch
