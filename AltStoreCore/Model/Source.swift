@@ -20,17 +20,17 @@ public extension Source
     #if STAGING
     
     #if ALPHA
-    static let altStoreSourceURL = URL(string: "https://github.com/suprdratts/LiveContainer/releases/download/nightly/apps_nightly.json")!
+    static let altStoreSourceURL = URL(string: "https://raw.githubusercontent.com/suprdratts/LCSideStore/refs/heads/main/src.json")!
     #else
-    static let altStoreSourceURL = URL(string: "https://github.com/suprdratts/LiveContainer/releases/download/nightly/apps_nightly.json")!
+    static let altStoreSourceURL = URL(string: "https://raw.githubusercontent.com/suprdratts/LCSideStore/refs/heads/main/src.json")!
     #endif
     
     #else
     
     #if ALPHA
-    static let altStoreSourceURL = URL(string: "https://github.com/suprdratts/LiveContainer/releases/download/nightly/apps_nightly.json")!
+    static let altStoreSourceURL = URL(string: "https://raw.githubusercontent.com/suprdratts/LCSideStore/refs/heads/main/src.json")!
     #else
-    static let altStoreSourceURL = URL(string: "https://github.com/suprdratts/LiveContainer/releases/download/nightly/apps_nightly.json")!
+    static let altStoreSourceURL = URL(string: "https://raw.githubusercontent.com/suprdratts/LCSideStore/refs/heads/main/src.json")!
     #endif
     
     #endif
