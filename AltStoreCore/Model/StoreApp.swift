@@ -731,7 +731,7 @@ public extension StoreApp
 public extension StoreApp
 {
     class var visibleAppsPredicate: NSPredicate {
-        let predicate = NSPredicate(format: "(%K != %@) AND ((%K == NO) OR (%K == NO) OR (%K == YES))",
+        let predicate = NSPredicate(format: "((%K == NO) OR (%K == NO) OR (%K == YES))",
                                     #keyPath(StoreApp.isPledgeRequired),
                                     #keyPath(StoreApp.isHiddenWithoutPledge),
                                     #keyPath(StoreApp.isPledged))
