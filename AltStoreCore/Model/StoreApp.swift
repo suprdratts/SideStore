@@ -732,7 +732,6 @@ public extension StoreApp
 {
     class var visibleAppsPredicate: NSPredicate {
         let predicate = NSPredicate(format: "(%K != %@) AND ((%K == NO) OR (%K == NO) OR (%K == YES))",
-                                    #keyPath(StoreApp.bundleIdentifier), StoreApp.altstoreAppID,
                                     #keyPath(StoreApp.isPledgeRequired),
                                     #keyPath(StoreApp.isHiddenWithoutPledge),
                                     #keyPath(StoreApp.isPledged))
