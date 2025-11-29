@@ -39,11 +39,11 @@ jobs:
         id: check
         run: |
           if [ -n "$LAST_SUCCESS" ]; then
-            NEW_COMMITS=$(git rev-list --count --since="$LAST_SUCCESS" origin/develop)
-            COMMIT_LOG=$(git log --since="$LAST_SUCCESS" --pretty=format:"%h %s" origin/develop)
+            NEW_COMMITS=$(git rev-list --count --since="$LAST_SUCCESS" LiveContainerSupport)
+            COMMIT_LOG=$(git log --since="$LAST_SUCCESS" --pretty=format:"%h %s" LiveContainerSupport)
           else
             NEW_COMMITS=1
-            COMMIT_LOG=$(git log -n 10 --pretty=format:"%h %s" origin/develop) # Show last 10 commits if no history
+            COMMIT_LOG=$(git log -n 10 --pretty=format:"%h %s" LiveContainerSupport) # Show last 10 commits if no history
           fi
           
           echo "Has changes: $NEW_COMMITS"
