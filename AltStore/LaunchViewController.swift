@@ -140,12 +140,10 @@ final class LaunchViewController: UIViewController, UIDocumentPickerDelegate {
         _ = file.startAccessingSecurityScopedResource()
         defer { file.stopAccessingSecurityScopedResource() }
         guard let accountD = try? Data(contentsOf: file) else {
-            let toastView = ToastView(text: NSLocalizedString("Could not read data from file!", comment: ""), detailText: "\(file)")
-            return toastView.show(in: self)
+            return Logger.main.notice("Could not parse data from file \(file)")
         }
         guard let account = try? Foundation.JSONDecoder().decode(ImportedAccount.self, from: accountD) else {
-            let toastView = ToastView(text: NSLocalizedString("Could not parse data from file!", comment: ""), detailText: "\(file)")
-            return toastView.show(in: self)
+            return Logger.main.notice("Could not parse data from file \(file)")
         }
         print("We want to import this account probably: \(account)")
         if remove {
