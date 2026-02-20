@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import SwiftUI
 import UserNotifications
 import MobileCoreServices
 import Intents
@@ -705,9 +704,37 @@ extension AppManager
             }
         }
         
-        let operation = AppOperation.install(app)
-        self.perform([operation], presentingViewController: presentingViewController, group: group)
         
+        Task{
+            var app: AppProtocol = app
+            // ---- Preflight bundle ID resolution ----
+            if UserDefaults.shared.customizeAppId,      // only show prompt when enabled by user
+               let presentingViewController {
+                let originalBundleID = app.bundleIdentifier
+
+                let resolution = await self.resolveBundleID(
+                    initial: originalBundleID,
+                    presentingViewController: presentingViewController
+                )
+
+                switch resolution {
+                    case .cancelled:
+                        completionHandler(.failure(OperationError.cancelled))
+                        group.progress.cancel()
+
+                    case .resolved(let newBundleID):
+                        app = AnyApp(
+                            name: app.name,
+                            bundleIdentifier: newBundleID,
+                            url: app.url,
+                            storeApp: app.storeApp
+                        )
+                }
+            }
+            
+            await self.perform([.install(app)], presentingViewController: presentingViewController, group: group)
+            
+        }
         return group
     }
     
@@ -732,10 +759,11 @@ extension AppManager
             }
         }
         
-        let operation = AppOperation.update(appVersion)
-        assert(operation.app as AnyObject !== installedApp) // Make sure we never accidentally "update" to already installed app.
+        assert(appVersion as AnyObject !== installedApp) // Make sure we never accidentally "update" to already installed app.
         
-        self.perform([operation], presentingViewController: presentingViewController, group: group)
+        Task{
+            await self.perform([.update(appVersion)], presentingViewController: presentingViewController, group: group)
+        }
         
         return group.progress
     }
@@ -745,16 +773,20 @@ extension AppManager
     {
         let group = group ?? RefreshGroup()
         
-        let operations = installedApps.map { AppOperation.refresh($0) }
-        return self.perform(operations, presentingViewController: presentingViewController, group: group)
+        Task{
+            await self.perform(installedApps.map { .refresh($0) }, presentingViewController: presentingViewController, group: group)
+        }
+        
+        return group
     }
     
     func activate(_ installedApp: InstalledApp, presentingViewController: UIViewController?, completionHandler: @escaping (Result<InstalledApp, Error>) -> Void)
     {
         let group = RefreshGroup()
         
-        let operation = AppOperation.activate(installedApp)
-        self.perform([operation], presentingViewController: presentingViewController, group: group)
+        Task{
+            await self.perform([.activate(installedApp)], presentingViewController: presentingViewController, group: group)
+        }
         
         group.completionHandler = { (results) in
             do
@@ -812,8 +844,9 @@ extension AppManager
                 }
             }
             
-            let operation = AppOperation.deactivate(installedApp)
-            self.perform([operation], presentingViewController: presentingViewController, group: group)
+            Task{
+                await self.perform([.deactivate(installedApp)], presentingViewController: presentingViewController, group: group)
+            }
         }
     }
     
@@ -837,8 +870,9 @@ extension AppManager
             }
         }
         
-        let operation = AppOperation.backup(installedApp)
-        self.perform([operation], presentingViewController: presentingViewController, group: group)
+        Task{
+            await self.perform([.backup(installedApp)], presentingViewController: presentingViewController, group: group)
+        }
     }
     
     func restore(_ installedApp: InstalledApp, presentingViewController: UIViewController?, completionHandler: @escaping (Result<InstalledApp, Error>) -> Void)
@@ -863,8 +897,9 @@ extension AppManager
             }
         }
         
-        let operation = AppOperation.restore(installedApp)
-        self.perform([operation], presentingViewController: presentingViewController, group: group)
+        Task{
+            await self.perform([.restore(installedApp)], presentingViewController: presentingViewController, group: group)
+        }
     }
     
     func remove(_ installedApp: InstalledApp, completionHandler: @escaping (Result<Void, Error>) -> Void)
@@ -1091,7 +1126,7 @@ private extension AppManager
     }
     
     @discardableResult
-    private func perform(_ operations: [AppOperation], presentingViewController: UIViewController?, group: RefreshGroup) -> RefreshGroup
+    private func perform(_ operations: [AppOperation], presentingViewController: UIViewController?, group: RefreshGroup) async -> RefreshGroup
     {
         let operations = operations.filter { self.progress(for: $0) == nil || self.progress(for: $0)?.isCancelled == true }
         
@@ -1153,38 +1188,10 @@ private extension AppManager
                     
                 case .activate(let app) where UserDefaults.standard.isLegacyDeactivationSupported: fallthrough
                 case .refresh(let app):
-                    // Check if backup app is installed in place of real app.
-//                    let altBackupUti = UTTypeCopyDeclaration(app.installedBackupAppUTI as CFString)?.takeRetainedValue() as NSDictionary?
-
-//                    if app.certificateSerialNumber != group.context.certificate?.serialNumber ||
-//                        altBackupUti != nil ||        // why would altbackup requires reinstall? it shouldn't cause we are just renewing profiles
-//                        app.needsResign ||            // why would an app require resign during refresh? it shouldn't!
-                        // We need to reinstall ourselves on refresh to ensure the new provisioning profile is used
-                        //  => mahee96: jkcoxson confirmed misagent manages profiles independently without requiring lockdownd or installd intervention, so sidestore profile renewal shouldn't require reinstall
-//                        app.bundleIdentifier == StoreApp.altstoreAppID    
-//                    {
-                        // Resign app instead of just refreshing profiles because either:
-                        // * Refreshing using different certificate     // when can this happen?, lets assume, refreshing with different certificate, why not just ask user to re-install manually? (probably we need re-install button)
-                        // * Backup app is still installed              // but why? I mean the AltBackup was put in place for a reason? ie during refresh just renew appIDs don't care about the app itself.
-                        // * App explicitly needs resigning             // when can this happen?
-                        // * Device is jailbroken and using AltDaemon on iOS 14.0 or later (b/c refreshing with provisioning profiles is broken)
-                        
-//                        let installProgress = self._install(app, operation: operation, group: group) { (result) in
-//                            self.finish(operation, result: result, group: group, progress: progress)
-//                        }
-//                        progress?.addChild(installProgress, withPendingUnitCount: 80)
-//                    }
-//                    else
-//                    {
-                        // Refreshing with same certificate as last time, and backup app isn't still installed,
-                        // so we can just refresh provisioning profiles.
-                        
-                        let refreshProgress = self._refresh(app, operation: operation, group: group) { (result) in
-                            self.finish(operation, result: result, group: group, progress: progress)
-                        }
-                        progress?.addChild(refreshProgress, withPendingUnitCount: 80)
-//                    }
-                    
+                    let refreshProgress = self._refresh(app, operation: operation, group: group) { (result) in
+                        self.finish(operation, result: result, group: group, progress: progress)
+                    }
+                    progress?.addChild(refreshProgress, withPendingUnitCount: 80)
                 case .activate(let app):
                     let activateProgress = self._activate(app, operation: operation, group: group) { (result) in
                         self.finish(operation, result: result, group: group, progress: progress)
@@ -1254,7 +1261,7 @@ private extension AppManager
     {
         let progress = Progress.discreteProgress(totalUnitCount: 100)
         
-        let context = context ?? InstallAppOperationContext(bundleIdentifier: app.bundleIdentifier, authenticatedContext: group.context)
+        let context = InstallAppOperationContext(bundleIdentifier: app.bundleIdentifier, authenticatedContext: group.context)
         assert(context.authenticatedContext === group.context)
         
         context.beginInstallationHandler = { (installedApp) in
@@ -1314,7 +1321,8 @@ private extension AppManager
                 
                 if cacheApp
                 {
-                    try FileManager.default.copyItem(at: app.fileURL, to: InstalledApp.fileURL(for: app), shouldReplace: true)
+                    let updatedApp = AnyApp(from: app, bundleId: context.bundleIdentifier)
+                    try FileManager.default.copyItem(at: app.fileURL, to: InstalledApp.fileURL(for: updatedApp), shouldReplace: true)
                 }
             }
             catch
@@ -1332,7 +1340,7 @@ private extension AppManager
         
         /* Verify App */
         let permissionsMode = UserDefaults.shared.permissionCheckingDisabled ? .none : permissionReviewMode
-        let verifyOperation = VerifyAppOperation(permissionsMode: permissionsMode, context: context)
+        let verifyOperation = VerifyAppOperation(permissionsMode: permissionsMode, context: context, customBundleId: app.bundleIdentifier)
         verifyOperation.resultHandler = { (result) in
             do
             {
@@ -1485,7 +1493,7 @@ private extension AppManager
                       let patchAppURL = URL(string: patchAppLink)
                 else { throw OperationError.invalidApp }
                 
-                let patchApp = AnyApp(name: app.name, bundleIdentifier: app.bundleIdentifier, url: patchAppURL, storeApp: nil)
+                let patchApp = AnyApp(name: app.name, bundleIdentifier: context.bundleIdentifier, url: patchAppURL, storeApp: nil)
                 
                 DispatchQueue.main.async {
                     let storyboard = UIStoryboard(name: "PatchApp", bundle: nil)
@@ -1507,7 +1515,7 @@ private extension AppManager
                             presentingViewController?.dismiss(animated: true, completion: nil)
                         }
                     }
-                    presentingViewController.present(navigationController, animated: true, completion: nil)                    
+                    presentingViewController.present(navigationController, animated: true, completion: nil)
                 }
             }
             catch
@@ -2299,6 +2307,126 @@ private extension AppManager
         {
         case .install, .update: self.installationProgress[bundleID] = progress
         case .refresh, .activate, .deactivate, .backup, .restore: self.refreshProgress[bundleID] = progress
+        }
+    }
+}
+
+private enum BundleIDAlertKeys {
+    static var okAction: UInt8 = 0
+}
+
+private func _isValidBundleID(_ value: String) -> Bool {
+    let pattern = #"^[A-Za-z][A-Za-z0-9\-]*(\.[A-Za-z0-9\-]+)+$"#
+    return value.range(of: pattern, options: .regularExpression) != nil
+}
+
+private extension UIResponder {
+    @objc func _validateBundleIDText(_ sender: UITextField) {
+        let isValid = sender.text.map(_isValidBundleID) ?? false
+
+        sender.backgroundColor =
+            isValid || sender.text?.isEmpty == true
+            ? .clear
+            : UIColor.systemRed.withAlphaComponent(0.2)
+
+        if
+            let alert = sender.superview?.superview as? UIAlertController,
+            let okAction = objc_getAssociatedObject(alert, &BundleIDAlertKeys.okAction) as? UIAlertAction
+        {
+            okAction.isEnabled = isValid
+        }
+    }
+}
+
+
+
+private extension AppManager {
+
+    func _presentBundleIDOverrideDialog(
+        bundleIdentifier: String,
+        presentingViewController: UIViewController,
+        completion: @escaping (BundleIDResolution) -> Void
+    ) {
+        let alert = self._makeBundleIDOverrideAlert(
+            initialBundleID: bundleIdentifier,
+            completion: completion
+        )
+
+        presentingViewController.present(alert, animated: true)
+    }
+
+    func _makeBundleIDOverrideAlert(
+        initialBundleID: String,
+        completion: @escaping (BundleIDResolution) -> Void
+    ) -> UIAlertController {
+
+        let alert = UIAlertController(
+            title: NSLocalizedString("Override Bundle Identifier", comment: ""),
+            message: nil,
+            preferredStyle: .alert
+        )
+
+        var okAction: UIAlertAction!
+
+        alert.addTextField { textField in
+            textField.text = initialBundleID
+            textField.autocapitalizationType = .none
+            textField.autocorrectionType = .no
+            textField.addTarget(
+                nil,
+                action: #selector(UIResponder._validateBundleIDText(_:)),
+                for: .editingChanged
+            )
+        }
+
+        okAction = UIAlertAction(title: NSLocalizedString("OK", comment: ""), style: .default) { _ in
+            completion(.resolved(alert.textFields?.first?.text ?? initialBundleID))
+        }
+
+        okAction.isEnabled = _isValidBundleID(initialBundleID)
+
+        let cancelAction = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { _ in
+            completion(.cancelled)
+        }
+
+        alert.addAction(cancelAction)
+        alert.addAction(okAction)
+
+        objc_setAssociatedObject(
+            alert,
+            &BundleIDAlertKeys.okAction,
+            okAction,
+            .OBJC_ASSOCIATION_ASSIGN
+        )
+
+        return alert
+    }
+}
+        
+
+// ---- Part 1: Add async resolver ----
+
+private extension AppManager {
+
+    enum BundleIDResolution {
+        case resolved(String)
+        case cancelled
+    }
+
+    @MainActor
+    func resolveBundleID(
+        initial: String,
+        presentingViewController: UIViewController
+    ) async -> BundleIDResolution {
+
+        await withCheckedContinuation { continuation in
+            let alert = self._makeBundleIDOverrideAlert(
+                initialBundleID: initial
+            ) { result in
+                continuation.resume(returning: result)
+            }
+
+            presentingViewController.present(alert, animated: true)
         }
     }
 }

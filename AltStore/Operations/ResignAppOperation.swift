@@ -55,6 +55,7 @@ final class ResignAppOperation: ResultOperation<ALTApplication>
         let prepareAppProgress = Progress.discreteProgress(totalUnitCount: 2)
         self.progress.addChild(prepareAppProgress, withPendingUnitCount: 3)
         
+        let effectiveBundleId = self.context.bundleIdentifier
         let prepareAppBundleProgress = self.prepareAppBundle(for: app, profiles: profiles, appexBundleIds: context.appexBundleIds ?? [:]) { (result) in
             guard let appBundleURL = self.process(result) else { return }
             
@@ -65,7 +66,13 @@ final class ResignAppOperation: ResultOperation<ALTApplication>
                 // Finish
                 do
                 {
-                    let destinationURL = InstalledApp.refreshedIPAURL(for: app)
+                    let updatedApp = AnyApp(
+                        name: app.name,
+                        bundleIdentifier: effectiveBundleId,
+                        url: app.fileURL,
+                        storeApp: app.storeApp
+                    )
+                    let destinationURL = InstalledApp.refreshedIPAURL(for: updatedApp)
                     try FileManager.default.copyItem(at: resignedURL, to: destinationURL, shouldReplace: true)
                     print("Successfully resigned app to \(destinationURL.absoluteString)")
                     
@@ -110,15 +117,13 @@ private extension ResignAppOperation
     func prepareAppBundle(for app: ALTApplication, profiles: [String: ALTProvisioningProfile], appexBundleIds: [String: String], completionHandler: @escaping (Result<URL, Error>) -> Void) -> Progress
     {
         let progress = Progress.discreteProgress(totalUnitCount: 1)
-        
-        let bundleIdentifier = app.bundleIdentifier
+
         let openURL = InstalledApp.openAppURL(for: app)
-        
         let fileURL = app.fileURL
-        
+        let identifier = context.bundleIdentifier
+
         func prepare(_ bundle: Bundle, additionalInfoDictionaryValues: [String: Any] = [:]) throws
         {
-            guard let identifier = bundle.bundleIdentifier else { throw ALTError(.missingAppBundle) }
             guard let profile = context.useMainProfile ? profiles.values.first : profiles[identifier] else { throw ALTError(.missingProvisioningProfile) }
             guard var infoDictionary = bundle.completeInfoDictionary else { throw ALTError(.missingInfoPlist) }
             
@@ -189,7 +194,7 @@ private extension ResignAppOperation
                 var allURLSchemes = infoDictionary[Bundle.Info.urlTypes] as? [[String: Any]] ?? []
                 
                 let altstoreURLScheme = ["CFBundleTypeRole": "Editor",
-                                         "CFBundleURLName": bundleIdentifier,
+                                         "CFBundleURLName": identifier,
                                          "CFBundleURLSchemes": [openURL.scheme!]] as [String : Any]
                 allURLSchemes.append(altstoreURLScheme)
                 
@@ -198,7 +203,7 @@ private extension ResignAppOperation
                 if app.isAltStoreApp
                 {
                     guard let udid = fetch_udid()?.toString() as? String else { throw OperationError.unknownUDID }
-                    guard let pairingFileString = Bundle.main.object(forInfoDictionaryKey: Bundle.Info.devicePairingString) as? String else { throw OperationError.unknownUDID }                    
+                    guard Bundle.main.object(forInfoDictionaryKey: Bundle.Info.devicePairingString) is String else { throw OperationError.unknownUDID }
                     additionalValues[Bundle.Info.devicePairingString] = "<insert pairing file here>"
                     additionalValues[Bundle.Info.deviceID] = udid
                     additionalValues[Bundle.Info.serverID] = UserDefaults.standard.preferredServerID

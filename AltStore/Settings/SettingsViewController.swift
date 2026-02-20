@@ -80,6 +80,7 @@ extension SettingsViewController
         case anisetteServers
         case betaUpdates
         case betaTrack
+        case customizeAppId
 //        case hiddenSettings
     }
     
@@ -125,6 +126,7 @@ final class SettingsViewController: UITableViewController
     @IBOutlet private var noIdleTimeoutSwitch: UISwitch!
     @IBOutlet private var disableAppLimitSwitch: UISwitch!
     @IBOutlet private var betaUpdatesSwitch: UISwitch!
+    @IBOutlet private var customizeAppIdSwitch: UISwitch!
     @IBOutlet private var exportResignedAppsSwitch: UISwitch!
     @IBOutlet private var verboseOperationsLoggingSwitch: UISwitch!
     @IBOutlet private var minimuxerConsoleLoggingSwitch: UISwitch!
@@ -475,7 +477,7 @@ private extension SettingsViewController
 
         // AdvancedSettingsRow
         self.betaUpdatesSwitch.isOn = UserDefaults.standard.isBetaUpdatesEnabled
-        self.betaTrackLabel.isEnabled = UserDefaults.standard.isBetaUpdatesEnabled
+        self.customizeAppIdSwitch.isOn = UserDefaults.standard.customizeAppId
         self.betaTrackPopupButton.isEnabled = UserDefaults.standard.isBetaUpdatesEnabled
 
         // DiagnosticsRow
@@ -740,6 +742,12 @@ private extension SettingsViewController
         betaTrackPopupButton.isEnabled = sender.isOn
         // update it in database
         UserDefaults.standard.isBetaUpdatesEnabled = sender.isOn
+    }
+    
+    @IBAction func toggleEnableAppIdCustomization(_ sender: UISwitch) {
+        customizeAppIdSwitch.isEnabled = sender.isOn
+        // update it in database
+        UserDefaults.standard.customizeAppId = sender.isOn
     }
     
     @IBAction func toggleIsBackgroundRefreshEnabled(_ sender: UISwitch)
@@ -1350,7 +1358,7 @@ extension SettingsViewController
 //                } else {
 //                    ELOG("UIApplication.openSettingsURLString invalid")
 //                }
-            case .refreshAttempts, .betaUpdates, .betaTrack: break
+            case .refreshAttempts, .betaUpdates, .betaTrack, .customizeAppId: break
 
             }
         case .signing:
